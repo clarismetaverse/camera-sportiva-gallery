@@ -1,77 +1,211 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <title>Camera Fiorita – Gallery</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<div id="room-gallery"
+     data-stanza="CameraFiorita">
+</div>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #111;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #fff;
+  }
+
+  #room-gallery {
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #111;
+  }
+
+  .slider-track {
+    display: flex;
+    transition: transform 0.6s ease;
+    will-change: transform;
+  }
+
+  .slide {
+    min-width: 100%;
+    height: 72vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+
+  .slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    border: none;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .nav-arrow:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: translateY(-50%) scale(1.04);
+  }
+
+  .nav-arrow.left { left: 22px; }
+  .nav-arrow.right { right: 22px; }
+
+  .dots {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.28);
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .dot.active {
+    background: #fff;
+    transform: scale(1.25);
+  }
+
+  .rg-message {
+    padding: 24px;
+    text-align: center;
+    color: #ccc;
+    font-size: 14px;
+  }
+</style>
+
+<script>
+  (function () {
+    // 🔧 METTI QUI IL TUO ENDPOINT XANO
+    const XANO_ENDPOINT =
+      'https://TUO-DOMINIO-XANO/api:ID/room_gallery';
+
+    const AUTO_PLAY = true;
+    const AUTO_PLAY_INTERVAL = 4500;
+
+    const container = document.getElementById('room-gallery');
+    if (!container) return;
+
+    const stanza = container.dataset.stanza || 'CameraFiorita';
+
+    container.innerHTML = '<div class="rg-message">Caricamento galleria…</div>';
+
+    function createSlider(images) {
+      if (!images || !images.length) {
+        container.innerHTML =
+          '<div class="rg-message">Nessuna immagine disponibile.</div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <button class="nav-arrow left" aria-label="Foto precedente">&#10094;</button>
+        <button class="nav-arrow right" aria-label="Foto successiva">&#10095;</button>
+        <div class="slider-track"></div>
+        <div class="dots"></div>
+      `;
+
+      const track = container.querySelector('.slider-track');
+      const dotsContainer = container.querySelector('.dots');
+
+      images.forEach((img, idx) => {
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+
+        const imageEl = document.createElement('img');
+        imageEl.src = img.url;
+        imageEl.alt = img.alt || `Immagine ${idx + 1}`;
+        imageEl.loading = 'lazy';
+
+        slide.appendChild(imageEl);
+        track.appendChild(slide);
+
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.dataset.index = idx;
+        dotsContainer.appendChild(dot);
+      });
+
+      let currentIndex = 0;
+      const total = images.length;
+      const dots = Array.from(dotsContainer.querySelectorAll('.dot'));
+
+      function updateSlider() {
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentIndex));
+      }
+
+      function next() {
+        currentIndex = (currentIndex + 1) % total;
+        updateSlider();
+      }
+
+      function prev() {
+        currentIndex = (currentIndex - 1 + total) % total;
+        updateSlider();
+      }
+
+      container.querySelector('.nav-arrow.left').onclick = prev;
+      container.querySelector('.nav-arrow.right').onclick = next;
+      dots.forEach(d =>
+        d.addEventListener('click', () => {
+          currentIndex = parseInt(d.dataset.index, 10) || 0;
+          updateSlider();
+        })
+      );
+
+      let autoTimer = null;
+      if (AUTO_PLAY && total > 1) {
+        autoTimer = setInterval(next, AUTO_PLAY_INTERVAL);
+        container.addEventListener('mouseenter', () => clearInterval(autoTimer));
+        container.addEventListener('mouseleave', () => {
+          autoTimer = setInterval(next, AUTO_PLAY_INTERVAL);
+        });
+      }
+
+      updateSlider();
     }
 
-    body {
-      margin: 0;
-      background: #cfdcdd; /* colore simile allo sfondo Wix che hai mostrato */
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    .gallery-wrapper {
-      max-width: 1400px;  /* larghezza massima del box */
-      margin: 0 auto;
-    }
-
-    .slider {
-      position: relative;
-      width: 100%;
-      /* ratio ~3:2 (puoi cambiare in 56.25% per 16:9) */
-      padding-bottom: 66.66%;
-      overflow: hidden;
-      background: #000;
-    }
-
-    .slide-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 0.7s ease-in-out;
-    }
-
-    .slide-img.active {
-      opacity: 1;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="gallery-wrapper">
-    <div class="slider">
-      <!-- Usa i nomi semplici che hai già nel repo -->
-      <img src="sportiva1.jpg" alt="Camera Fiorita 1" class="slide-img active">
-      <img src="sportiva2.jpg" alt="Camera Fiorita 2" class="slide-img">
-      <img src="sportiva3.jpg" alt="Camera Fiorita 3" class="slide-img">
-      <img src="sportiva4.jpg" alt="Camera Fiorita 4" class="slide-img">
-      <img src="sportiva5.jpg" alt="Camera Fiorita 5" class="slide-img">
-    </div>
-  </div>
-
-  <script>
-    const slides = Array.from(document.querySelectorAll(".slide-img"));
-    let index = 0;
-    const INTERVAL = 3000; // 3 secondi
-
-    function showNext() {
-      slides[index].classList.remove("active");
-      index = (index + 1) % slides.length;
-      slides[index].classList.add("active");
-    }
-
-    setInterval(showNext, INTERVAL);
-  </script>
-</body>
-</html>
+    fetch(`${XANO_ENDPOINT}?stanza=${encodeURIComponent(stanza)}`)
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const images = Array.isArray(data) ? data : data.images;
+        createSlider(images);
+      })
+      .catch(err => {
+        console.error('Errore galleria Xano:', err);
+        container.innerHTML =
+          '<div class="rg-message">Errore nel caricamento della galleria.</div>';
+      });
+  })();
+</script>
