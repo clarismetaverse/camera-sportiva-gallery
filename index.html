@@ -1,92 +1,173 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Camera mobile</title>
   <style>
+    :root {
+      --bg-page: #243433;
+      --bg-panel: #283837;
+      --bg-chip: rgba(255,255,255,0.06);
+      --bg-chip-strong: rgba(255,255,255,0.12);
+      --accent: #f4eee5;
+      --accent-soft: rgba(244,238,229,0.3);
+      --text-main: #ffffff;
+      --text-muted: rgba(255,255,255,0.75);
+      --text-soft: rgba(255,255,255,0.6);
+      --border-soft: rgba(255,255,255,0.12);
+      --radius-lg: 18px;
+      --shadow-soft: 0 18px 40px rgba(0,0,0,0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
-      background: #0c1010;
-      color: #ffffff;
+      background: var(--bg-page);
+      color: var(--text-main);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
     }
 
     .room-mobile {
       width: 100%;
-      box-sizing: border-box;
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--bg-panel);
+      min-height: 100vh;
+      box-shadow: var(--shadow-soft);
     }
 
+    /* ---- ANIMAZIONI ---- */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.55s ease forwards;
+    }
+    .fade-in {
+      animation: fadeIn 0.55s ease forwards;
+    }
+
+    /* ---- HEADER ---- */
     .room-header-img {
       width: 100%;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 4/3;
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
       position: relative;
-      background-color: #202525;
+      background-color: #202725;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      overflow: hidden;
+      opacity: 0;
     }
 
     .room-header-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.25),
-        rgba(0,0,0,0.55)
-      );
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.06),
+          rgba(0,0,0,0.5)
+        );
     }
 
+    .room-header-tag {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.15);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-soft);
+    }
+
+    /* ---- CONTENUTO ---- */
     .room-content {
-      padding: 16px 14px 10px;
+      padding: 18px 16px 12px;
+      opacity: 0;
     }
 
     .room-title {
       font-size: 22px;
       margin: 0 0 4px;
+      letter-spacing: 0.02em;
     }
 
     .room-subtitle {
       font-size: 14px;
-      opacity: 0.9;
-      margin: 0 0 10px;
+      margin: 0 0 12px;
+      color: var(--text-muted);
     }
 
     .room-badges {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 5px 11px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.08);
+      background: var(--bg-chip);
+      border: 1px solid var(--border-soft);
       font-size: 12px;
+      color: var(--text-muted);
     }
 
-    .badge-icon {
-      font-size: 14px;
+    .badge-strong {
+      background: var(--bg-chip-strong);
+    }
+
+    .badge-icon svg {
+      width: 15px;
+      height: 15px;
+      display: block;
     }
 
     .room-desc {
       font-size: 14px;
       line-height: 1.6;
-      margin: 0 0 8px;
+      margin: 0 0 10px;
     }
-
     .room-desc-short {
-      opacity: 0.9;
+      color: var(--text-soft);
     }
-
     .room-desc-full {
-      opacity: 0.95;
+      color: var(--text-muted);
     }
 
+    /* ---- BOTTONI ---- */
     .room-button,
     .room-load-more,
     .room-close,
@@ -94,15 +175,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 16px;
+      padding: 9px 18px;
       border-radius: 999px;
-      border: none;
-      background: #2d4f4f;
-      color: #ffffff;
+      border: 1px solid var(--accent-soft);
+      background: transparent;
+      color: var(--accent);
       font-size: 14px;
       cursor: pointer;
       text-decoration: none;
-      margin-top: 6px;
+      transition: background 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
     }
 
     .room-button:active,
@@ -112,14 +193,31 @@
       transform: scale(0.97);
     }
 
+    .room-button {
+      background: rgba(244,238,229,0.1);
+      border-color: rgba(244,238,229,0.4);
+    }
+
+    .room-button:hover {
+      background: rgba(244,238,229,0.18);
+    }
+
+    .room-button[disabled] {
+      opacity: 0.4;
+      cursor: default;
+      transform: none;
+    }
+
+    /* ---- GALLERIA ---- */
     .room-gallery-wrapper {
-      padding: 8px 0 16px;
+      padding: 6px 0 18px;
+      opacity: 0;
     }
 
     .room-gallery-column {
       width: 100%;
       box-sizing: border-box;
-      padding: 0 14px 8px;
+      padding: 0 16px 6px;
     }
 
     .room-gallery-column img {
@@ -127,263 +225,303 @@
       display: block;
       margin: 0 0 8px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.5);
+      background: #151b1a;
+      opacity: 0;
+      animation: fadeUp 0.45s ease forwards;
     }
 
     .room-load-more {
-      width: calc(100% - 28px);
-      margin: 4px 14px 0;
-      background: #404f4f;
+      width: calc(100% - 32px);
+      margin: 6px 16px 0;
+      border-style: dashed;
+      border-color: var(--border-soft);
+      color: var(--text-soft);
+    }
+
+    .room-load-more:hover {
+      background: rgba(255,255,255,0.04);
     }
 
     .room-gallery-actions {
       display: flex;
       justify-content: space-between;
       gap: 8px;
-      padding: 8px 14px 0;
+      padding: 10px 16px 0;
     }
 
     .room-close {
-      background: #444;
+      flex: 1;
+      border-color: rgba(255,255,255,0.18);
+      color: var(--text-soft);
+      background: rgba(0,0,0,0.24);
+    }
+    .room-close:hover {
+      background: rgba(0,0,0,0.32);
     }
 
     .room-next {
-      background: #607d8b;
+      flex: 1;
+      border-color: rgba(220,235,230,0.55);
+      background: rgba(222,244,236,0.09);
+      color: var(--accent);
+    }
+    .room-next:hover {
+      background: rgba(222,244,236,0.18);
+    }
+
+    .room-next span {
+      margin-left: 4px;
     }
 
     .room-skeleton-note {
       font-size: 12px;
-      opacity: 0.7;
+      color: var(--text-soft);
     }
   </style>
 </head>
 <body>
-  <div id="app"></div>
+<div id="app"></div>
 
-  <script>
-    (function () {
-      const API_META  = "https://xbut-eryu-hhsg.f2.xano.io/api:X1XvnYjh/camera_cascina";
-      const API_FOTOS = "https://xbut-eryu-hhsg.f2.xano.io/api:X1XvnYjh/Cascina";
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
 
-      const params = new URLSearchParams(window.location.search);
-      const roomNameParam = (params.get("Name") || params.get("name") || "Libri").toLowerCase();
-      const nextUrlParam  = params.get("next") || "";
-      const defaultBeds   = parseInt(params.get("beds") || "2", 10);
+  // es: ?name=Libri&beds=2&next=/link-prossima-stanza
+  const roomName   = (params.get("name") || "Libri").toLowerCase();
+  const beds       = parseInt(params.get("beds") || "2", 10);
+  const nextUrl    = params.get("next") || "";
+  const END_META   = "https://xbut-eryu-hhsg.f2.xano.io/api:X1XvnYjh/camera_cascina";
+  const END_FOTOS  = "https://xbut-eryu-hhsg.f2.xano.io/api:X1XvnYjh/Cascina";
 
-      const app = document.getElementById("app");
-      if (!app) return;
+  const app = document.getElementById("app");
+  if (!app) return;
 
-      app.innerHTML = `
-        <div class="room-mobile">
-          <div class="room-header-img">
-            <div class="room-header-overlay"></div>
+  app.innerHTML = `
+    <div class="room-mobile">
+      <div class="room-header-img" id="room-header">
+        <div class="room-header-overlay"></div>
+        <div class="room-header-tag">Camera &amp; Suite</div>
+      </div>
+
+      <div class="room-content" id="room-content">
+        <h2 class="room-title">Caricamento stanza…</h2>
+        <h3 class="room-subtitle" style="display:none;"></h3>
+
+        <div class="room-badges">
+          <div class="badge badge-strong">
+            <span class="badge-icon">
+              <!-- Icona letto / ospiti -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor"
+                  d="M3 6.5C3 5.12 4.12 4 5.5 4S8 5.12 8 6.5 6.88 9 5.5 9 3 7.88 3 6.5Zm3.5 3.5h10c2.21 0 4 1.79 4 4v4h-2v-2H5v2H3v-8c0-1.66 1.34-3 3-3Zm0 2c-.55 0-1 .45-1 1v2h13v-1c0-1.1-.9-2-2-2H6.5Z" />
+              </svg>
+            </span>
+            <span>${beds} ospiti</span>
           </div>
 
-          <div class="room-content">
-            <h2 class="room-title">Caricamento stanza…</h2>
-            <h3 class="room-subtitle" style="display:none;"></h3>
-
-            <div class="room-badges">
-              <div class="badge">
-                <span class="badge-icon">🛏</span>
-                <span>${defaultBeds} ospiti</span>
-              </div>
-              <div class="badge" data-badge-m2 style="display:none;">
-                <span class="badge-icon">㎡</span>
-                <span class="badge-m2-text"></span>
-              </div>
-            </div>
-
-            <p class="room-desc room-desc-short room-skeleton-note">
-              Stiamo caricando la descrizione e le foto da Xano…
-            </p>
-            <div class="room-desc room-desc-full" hidden></div>
-
-            <button class="room-button room-see-more" disabled>
-              Scopri di più
-            </button>
-          </div>
-
-          <div class="room-gallery-wrapper" hidden>
-            <div class="room-gallery-column" id="room-gallery-column"></div>
-            <button class="room-load-more" hidden>Mostra altre foto</button>
-            <div class="room-gallery-actions">
-              <button class="room-close">Chiudi stanza</button>
-              <a class="room-next" target="_top"${nextUrlParam ? ` href="${nextUrlParam}"` : ' style="display:none;"'}>
-                Stanza successiva →
-              </a>
-            </div>
+          <div class="badge" data-badge-m2 style="display:none;">
+            <span class="badge-icon">
+              <!-- Icona metri quadri -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor"
+                  d="M5 5h14v14H5V5Zm2 2v10h10V7H7Zm1.5 2H11v6H8.5v-6Zm3.5 0h4v1.5h-4V9Zm0 3h4v1.5h-4V12Z" />
+              </svg>
+            </span>
+            <span class="badge-m2-text"></span>
           </div>
         </div>
-      `;
 
-      const header        = app.querySelector(".room-header-img");
-      const titleEl       = app.querySelector(".room-title");
-      const subEl         = app.querySelector(".room-subtitle");
-      const badgeM2       = app.querySelector("[data-badge-m2]");
-      const badgeM2Text   = app.querySelector(".badge-m2-text");
-      const descShortEl   = app.querySelector(".room-desc-short");
-      const descFullEl    = app.querySelector(".room-desc-full");
-      const btnSeeMore    = app.querySelector(".room-see-more");
-      const galleryWrap   = app.querySelector(".room-gallery-wrapper");
-      const galleryCol    = app.querySelector("#room-gallery-column");
-      const btnLoadMore   = app.querySelector(".room-load-more");
-      const btnClose      = app.querySelector(".room-close");
+        <p class="room-desc room-desc-short room-skeleton-note">
+          Stiamo caricando la descrizione e le foto da Xano…
+        </p>
+        <div class="room-desc room-desc-full" hidden></div>
 
-      let allUrls = [];
-      let loadedCount = 0;
-      const INITIAL_BATCH = 4;
-      let stanzaLabel = roomNameParam;
+        <button class="room-button room-see-more" disabled>
+          Scopri la camera
+        </button>
+      </div>
 
-      function appendImages(fromIndex, toIndex) {
-        for (let i = fromIndex; i < toIndex && i < allUrls.length; i++) {
-          const url = allUrls[i];
-          const img = document.createElement("img");
-          img.src = url;
-          img.alt = stanzaLabel + " " + (i + 1);
-          img.loading = "lazy";
-          galleryCol.appendChild(img);
-          loadedCount++;
-        }
-      }
+      <div class="room-gallery-wrapper" id="room-gallery" hidden>
+        <div class="room-gallery-column" id="room-gallery-column"></div>
+        <button class="room-load-more" hidden>Mostra altre foto</button>
+        <div class="room-gallery-actions">
+          <button class="room-close">Chiudi stanza</button>
+          <a class="room-next" target="_top"${nextUrl ? ` href="${nextUrl}"` : ' style="display:none;"'}>
+            Prossima stanza <span>→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
 
-      function ensureSeeMoreEnabled() {
-        if (btnSeeMore) {
-          btnSeeMore.disabled = false;
-        }
-      }
+  const header        = app.querySelector("#room-header");
+  const contentWrap   = app.querySelector("#room-content");
+  const galleryWrap   = app.querySelector("#room-gallery");
 
-      /* 1) Meta stanza */
-      fetch(API_META, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Name: roomNameParam })
+  const titleEl       = app.querySelector(".room-title");
+  const subEl         = app.querySelector(".room-subtitle");
+  const badgeM2       = app.querySelector("[data-badge-m2]");
+  const badgeM2Text   = app.querySelector(".badge-m2-text");
+  const descShortEl   = app.querySelector(".room-desc-short");
+  const descFullEl    = app.querySelector(".room-desc-full");
+  const btnSeeMore    = app.querySelector(".room-see-more");
+  const galleryCol    = app.querySelector("#room-gallery-column");
+  const btnLoadMore   = app.querySelector(".room-load-more");
+  const btnClose      = app.querySelector(".room-close");
+
+  let stanzaLabel = roomName;
+  let allUrls = [];
+  let loadedCount = 0;
+  const BATCH = 4;
+
+  function animateIn(el) {
+    if (!el) return;
+    el.classList.remove("fade-up","fade-in");
+    // forza reflow per riavviare l’animazione, se necessario
+    void el.offsetWidth;
+    if (el === header || el === galleryWrap) {
+      el.classList.add("fade-in");
+    } else {
+      el.classList.add("fade-up");
+    }
+    el.style.opacity = "1";
+  }
+
+  function appendImages(from, to) {
+    for (let i = from; i < to && i < allUrls.length; i++) {
+      const url = allUrls[i];
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = stanzaLabel + " " + (i + 1);
+      img.loading = "lazy";
+      galleryCol.appendChild(img);
+      loadedCount++;
+    }
+  }
+
+  function loadImages() {
+    if (allUrls.length) {
+      const start = loadedCount;
+      appendImages(start, start + BATCH);
+      btnLoadMore.hidden = loadedCount >= allUrls.length;
+      galleryWrap.hidden = false;
+      animateIn(galleryWrap);
+      return;
+    }
+
+    fetch(END_FOTOS, { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => {
+        if (!Array.isArray(data)) return;
+
+        allUrls = data
+          .filter(r =>
+            r.Stanza &&
+            r.Picture &&
+            r.Picture.url &&
+            r.Stanza.toLowerCase() === stanzaLabel.toLowerCase()
+          )
+          .map(r => r.Picture.url);
+
+        if (!allUrls.length) return;
+
+        appendImages(0, BATCH);
+        btnLoadMore.hidden = loadedCount >= allUrls.length;
+        galleryWrap.hidden = false;
+        animateIn(galleryWrap);
       })
-        .then(res => res.json())
-        .then(data => {
-          const info = Array.isArray(data) ? data[0] : data;
-          if (!info || !info.Name) {
-            titleEl.textContent = "Camera non trovata";
-            descShortEl.textContent = "Controlla che Name in Xano corrisponda al parametro ?Name nella URL.";
-            return;
-          }
+      .catch(console.error);
+  }
 
-          stanzaLabel = info.Name;
+  // --- Carica meta camera da Xano ---
+  fetch(END_META, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ Name: roomName })
+  })
+    .then(r => r.json())
+    .then(data => {
+      const info = Array.isArray(data) ? data[0] : data;
+      if (!info || !info.Name) {
+        titleEl.textContent = "Camera non trovata";
+        descShortEl.textContent = "Il parametro ?name= non corrisponde a nessuna stanza in Xano.";
+        animateIn(header);
+        animateIn(contentWrap);
+        return;
+      }
+      stanzaLabel = info.Name;
 
-          const title       = info.Title || info.Name || "Camera";
-          const subtitle    = info.Subtitle || "";
-          const meters      = info.Meters || null;
-          const description = info.Description || "";
-          const headUrl     = info.Head && info.Head.url ? info.Head.url : null;
+      const title       = info.Title || info.Name;
+      const subtitle    = info.Subtitle || "";
+      const meters      = info.Meters || null;
+      const description = info.Description || "";
+      const headUrl     = info.Head && info.Head.url ? info.Head.url : null;
 
-          const shortDesc = description.length > 180
-            ? description.slice(0, 180).trim() + "…"
-            : description;
+      const shortDesc = description.length > 200
+        ? description.slice(0, 200).trim() + "…"
+        : description;
 
-          titleEl.textContent = title;
-
-          if (subtitle) {
-            subEl.textContent = subtitle;
-            subEl.style.display = "";
-          }
-
-          if (meters && badgeM2 && badgeM2Text) {
-            badgeM2Text.textContent = meters + " m²";
-            badgeM2.style.display = "inline-flex";
-          }
-
-          descShortEl.classList.remove("room-skeleton-note");
-          descShortEl.textContent = shortDesc;
-          descFullEl.textContent  = description;
-
-          if (headUrl) {
-            header.style.backgroundImage = "url('" + headUrl + "')";
-          }
-
-          ensureSeeMoreEnabled();
-        })
-        .catch(err => {
-          console.error("Errore meta camera:", err);
-          titleEl.textContent = "Errore nel caricamento";
-          descShortEl.textContent = "Non riusciamo a recuperare i dati della stanza da Xano.";
-        });
-
-      /* 2) Galleria */
-      function loadImages() {
-        if (allUrls.length) {
-          const nextIndex = loadedCount;
-          appendImages(nextIndex, nextIndex + INITIAL_BATCH);
-          if (btnLoadMore) {
-            btnLoadMore.hidden = loadedCount >= allUrls.length;
-          }
-          galleryWrap.hidden = false;
-          return;
-        }
-
-        fetch(API_FOTOS, { cache: "no-store" })
-          .then(res => res.json())
-          .then(data => {
-            if (!Array.isArray(data)) return;
-
-            allUrls = data
-              .filter(r =>
-                r.Stanza &&
-                r.Picture &&
-                r.Picture.url &&
-                r.Stanza.toLowerCase() === stanzaLabel.toLowerCase()
-              )
-              .map(r => r.Picture.url);
-
-            if (!allUrls.length) {
-              console.warn("Nessuna immagine per stanza:", stanzaLabel);
-              return;
-            }
-
-            appendImages(0, INITIAL_BATCH);
-            if (btnLoadMore) {
-              btnLoadMore.hidden = loadedCount >= allUrls.length;
-            }
-            galleryWrap.hidden = false;
-          })
-          .catch(err => {
-            console.error("Errore caricando immagini:", err);
-          });
+      titleEl.textContent = title;
+      if (subtitle) {
+        subEl.textContent = subtitle;
+        subEl.style.display = "";
       }
 
-      if (btnSeeMore) {
-        btnSeeMore.addEventListener("click", () => {
-          descShortEl.hidden = true;
-          descFullEl.hidden  = false;
-
-          loadImages();
-
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
+      if (meters && badgeM2 && badgeM2Text) {
+        badgeM2Text.textContent = meters + " m²";
+        badgeM2.style.display = "inline-flex";
       }
 
-      if (btnLoadMore) {
-        btnLoadMore.addEventListener("click", () => {
-          loadImages();
-        });
+      descShortEl.classList.remove("room-skeleton-note");
+      descShortEl.textContent = shortDesc;
+      descFullEl.textContent  = description;
+
+      if (headUrl) {
+        header.style.backgroundImage = "url('" + headUrl + "')";
       }
 
-      if (btnClose) {
-        btnClose.addEventListener("click", () => {
-          descShortEl.hidden = false;
-          descFullEl.hidden  = true;
+      btnSeeMore.disabled = false;
 
-          galleryWrap.hidden = true;
-          galleryCol.innerHTML = "";
-          allUrls = [];
-          loadedCount = 0;
-          if (btnLoadMore) btnLoadMore.hidden = true;
+      animateIn(header);
+      animateIn(contentWrap);
+    })
+    .catch(err => {
+      console.error(err);
+      titleEl.textContent = "Errore nel caricamento";
+      descShortEl.textContent = "Non riusciamo a recuperare i dati della stanza da Xano.";
+      animateIn(header);
+      animateIn(contentWrap);
+    });
 
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-      }
-    })();
-  </script>
+  // --- Interazioni ---
+  btnSeeMore.addEventListener("click", () => {
+    descShortEl.hidden = true;
+    descFullEl.hidden  = false;
+    loadImages();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  btnLoadMore.addEventListener("click", () => {
+    loadImages();
+  });
+
+  btnClose.addEventListener("click", () => {
+    descShortEl.hidden = false;
+    descFullEl.hidden  = true;
+    galleryWrap.hidden = true;
+    galleryCol.innerHTML = "";
+    allUrls = [];
+    loadedCount = 0;
+    btnLoadMore.hidden = true;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+})();
+</script>
 </body>
 </html>
 
-     
+   
+  
+       
