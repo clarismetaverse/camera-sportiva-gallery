@@ -1,211 +1,389 @@
-<div id="room-gallery"
-     data-stanza="CameraFiorita">
-</div>
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camera mobile</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0c1010;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background: #111;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: #fff;
-  }
+    .room-mobile {
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-  #room-gallery {
-    position: relative;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    overflow: hidden;
-    background: #111;
-  }
+    .room-header-img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      position: relative;
+      background-color: #202525;
+    }
 
-  .slider-track {
-    display: flex;
-    transition: transform 0.6s ease;
-    will-change: transform;
-  }
+    .room-header-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.25),
+        rgba(0,0,0,0.55)
+      );
+    }
 
-  .slide {
-    min-width: 100%;
-    height: 72vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-  }
+    .room-content {
+      padding: 16px 14px 10px;
+    }
 
-  .slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
-  }
+    .room-title {
+      font-size: 22px;
+      margin: 0 0 4px;
+    }
 
-  .nav-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 52px;
-    height: 52px;
-    border-radius: 26px;
-    border: none;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(6px);
-    color: #fff;
-    font-size: 26px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: background 0.2s ease, transform 0.2s ease;
-  }
+    .room-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      margin: 0 0 10px;
+    }
 
-  .nav-arrow:hover {
-    background: rgba(0, 0, 0, 0.7);
-    transform: translateY(-50%) scale(1.04);
-  }
+    .room-badges {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
 
-  .nav-arrow.left { left: 22px; }
-  .nav-arrow.right { right: 22px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      font-size: 12px;
+    }
 
-  .dots {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-    z-index: 10;
-  }
+    .badge-icon {
+      font-size: 14px;
+    }
 
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.28);
-    cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
-  }
+    .room-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 8px;
+    }
 
-  .dot.active {
-    background: #fff;
-    transform: scale(1.25);
-  }
+    .room-desc-short {
+      opacity: 0.9;
+    }
 
-  .rg-message {
-    padding: 24px;
-    text-align: center;
-    color: #ccc;
-    font-size: 14px;
-  }
-</style>
+    .room-desc-full {
+      opacity: 0.95;
+    }
 
-<script>
-  (function () {
-    // 🔧 METTI QUI IL TUO ENDPOINT XANO
-    const XANO_ENDPOINT =
-      'https://TUO-DOMINIO-XANO/api:ID/room_gallery';
+    .room-button,
+    .room-load-more,
+    .room-close,
+    .room-next {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      background: #2d4f4f;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 6px;
+    }
 
-    const AUTO_PLAY = true;
-    const AUTO_PLAY_INTERVAL = 4500;
+    .room-button:active,
+    .room-load-more:active,
+    .room-close:active,
+    .room-next:active {
+      transform: scale(0.97);
+    }
 
-    const container = document.getElementById('room-gallery');
-    if (!container) return;
+    .room-gallery-wrapper {
+      padding: 8px 0 16px;
+    }
 
-    const stanza = container.dataset.stanza || 'CameraFiorita';
+    .room-gallery-column {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 14px 8px;
+    }
 
-    container.innerHTML = '<div class="rg-message">Caricamento galleria…</div>';
+    .room-gallery-column img {
+      width: 100%;
+      display: block;
+      margin: 0 0 8px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
 
-    function createSlider(images) {
-      if (!images || !images.length) {
-        container.innerHTML =
-          '<div class="rg-message">Nessuna immagine disponibile.</div>';
-        return;
-      }
+    .room-load-more {
+      width: calc(100% - 28px);
+      margin: 4px 14px 0;
+      background: #404f4f;
+    }
 
-      container.innerHTML = `
-        <button class="nav-arrow left" aria-label="Foto precedente">&#10094;</button>
-        <button class="nav-arrow right" aria-label="Foto successiva">&#10095;</button>
-        <div class="slider-track"></div>
-        <div class="dots"></div>
+    .room-gallery-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 14px 0;
+    }
+
+    .room-close {
+      background: #444;
+    }
+
+    .room-next {
+      background: #607d8b;
+    }
+
+    .room-skeleton-note {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    (function () {
+      const API_META  = "https://xbut-eryu-hhsg.f2.xano.io/api:X1XvnYjh/camera_cascina";
+      const API_FOTOS = "https://xbut-eryu-hhsg.f2.xano.io/api:X1XvnYjh/Cascina";
+
+      const params = new URLSearchParams(window.location.search);
+      const roomNameParam = (params.get("Name") || params.get("name") || "Libri").toLowerCase();
+      const nextUrlParam  = params.get("next") || "";
+      const defaultBeds   = parseInt(params.get("beds") || "2", 10);
+
+      const app = document.getElementById("app");
+      if (!app) return;
+
+      app.innerHTML = `
+        <div class="room-mobile">
+          <div class="room-header-img">
+            <div class="room-header-overlay"></div>
+          </div>
+
+          <div class="room-content">
+            <h2 class="room-title">Caricamento stanza…</h2>
+            <h3 class="room-subtitle" style="display:none;"></h3>
+
+            <div class="room-badges">
+              <div class="badge">
+                <span class="badge-icon">🛏</span>
+                <span>${defaultBeds} ospiti</span>
+              </div>
+              <div class="badge" data-badge-m2 style="display:none;">
+                <span class="badge-icon">㎡</span>
+                <span class="badge-m2-text"></span>
+              </div>
+            </div>
+
+            <p class="room-desc room-desc-short room-skeleton-note">
+              Stiamo caricando la descrizione e le foto da Xano…
+            </p>
+            <div class="room-desc room-desc-full" hidden></div>
+
+            <button class="room-button room-see-more" disabled>
+              Scopri di più
+            </button>
+          </div>
+
+          <div class="room-gallery-wrapper" hidden>
+            <div class="room-gallery-column" id="room-gallery-column"></div>
+            <button class="room-load-more" hidden>Mostra altre foto</button>
+            <div class="room-gallery-actions">
+              <button class="room-close">Chiudi stanza</button>
+              <a class="room-next" target="_top"${nextUrlParam ? ` href="${nextUrlParam}"` : ' style="display:none;"'}>
+                Stanza successiva →
+              </a>
+            </div>
+          </div>
+        </div>
       `;
 
-      const track = container.querySelector('.slider-track');
-      const dotsContainer = container.querySelector('.dots');
+      const header        = app.querySelector(".room-header-img");
+      const titleEl       = app.querySelector(".room-title");
+      const subEl         = app.querySelector(".room-subtitle");
+      const badgeM2       = app.querySelector("[data-badge-m2]");
+      const badgeM2Text   = app.querySelector(".badge-m2-text");
+      const descShortEl   = app.querySelector(".room-desc-short");
+      const descFullEl    = app.querySelector(".room-desc-full");
+      const btnSeeMore    = app.querySelector(".room-see-more");
+      const galleryWrap   = app.querySelector(".room-gallery-wrapper");
+      const galleryCol    = app.querySelector("#room-gallery-column");
+      const btnLoadMore   = app.querySelector(".room-load-more");
+      const btnClose      = app.querySelector(".room-close");
 
-      images.forEach((img, idx) => {
-        const slide = document.createElement('div');
-        slide.className = 'slide';
+      let allUrls = [];
+      let loadedCount = 0;
+      const INITIAL_BATCH = 4;
+      let stanzaLabel = roomNameParam;
 
-        const imageEl = document.createElement('img');
-        imageEl.src = img.url;
-        imageEl.alt = img.alt || `Immagine ${idx + 1}`;
-        imageEl.loading = 'lazy';
-
-        slide.appendChild(imageEl);
-        track.appendChild(slide);
-
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        dot.dataset.index = idx;
-        dotsContainer.appendChild(dot);
-      });
-
-      let currentIndex = 0;
-      const total = images.length;
-      const dots = Array.from(dotsContainer.querySelectorAll('.dot'));
-
-      function updateSlider() {
-        track.style.transform = `translateX(-${currentIndex * 100}%)`;
-        dots.forEach((d, i) => d.classList.toggle('active', i === currentIndex));
+      function appendImages(fromIndex, toIndex) {
+        for (let i = fromIndex; i < toIndex && i < allUrls.length; i++) {
+          const url = allUrls[i];
+          const img = document.createElement("img");
+          img.src = url;
+          img.alt = stanzaLabel + " " + (i + 1);
+          img.loading = "lazy";
+          galleryCol.appendChild(img);
+          loadedCount++;
+        }
       }
 
-      function next() {
-        currentIndex = (currentIndex + 1) % total;
-        updateSlider();
+      function ensureSeeMoreEnabled() {
+        if (btnSeeMore) {
+          btnSeeMore.disabled = false;
+        }
       }
 
-      function prev() {
-        currentIndex = (currentIndex - 1 + total) % total;
-        updateSlider();
-      }
+      /* 1) Meta stanza */
+      fetch(API_META, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Name: roomNameParam })
+      })
+        .then(res => res.json())
+        .then(data => {
+          const info = Array.isArray(data) ? data[0] : data;
+          if (!info || !info.Name) {
+            titleEl.textContent = "Camera non trovata";
+            descShortEl.textContent = "Controlla che Name in Xano corrisponda al parametro ?Name nella URL.";
+            return;
+          }
 
-      container.querySelector('.nav-arrow.left').onclick = prev;
-      container.querySelector('.nav-arrow.right').onclick = next;
-      dots.forEach(d =>
-        d.addEventListener('click', () => {
-          currentIndex = parseInt(d.dataset.index, 10) || 0;
-          updateSlider();
+          stanzaLabel = info.Name;
+
+          const title       = info.Title || info.Name || "Camera";
+          const subtitle    = info.Subtitle || "";
+          const meters      = info.Meters || null;
+          const description = info.Description || "";
+          const headUrl     = info.Head && info.Head.url ? info.Head.url : null;
+
+          const shortDesc = description.length > 180
+            ? description.slice(0, 180).trim() + "…"
+            : description;
+
+          titleEl.textContent = title;
+
+          if (subtitle) {
+            subEl.textContent = subtitle;
+            subEl.style.display = "";
+          }
+
+          if (meters && badgeM2 && badgeM2Text) {
+            badgeM2Text.textContent = meters + " m²";
+            badgeM2.style.display = "inline-flex";
+          }
+
+          descShortEl.classList.remove("room-skeleton-note");
+          descShortEl.textContent = shortDesc;
+          descFullEl.textContent  = description;
+
+          if (headUrl) {
+            header.style.backgroundImage = "url('" + headUrl + "')";
+          }
+
+          ensureSeeMoreEnabled();
         })
-      );
+        .catch(err => {
+          console.error("Errore meta camera:", err);
+          titleEl.textContent = "Errore nel caricamento";
+          descShortEl.textContent = "Non riusciamo a recuperare i dati della stanza da Xano.";
+        });
 
-      let autoTimer = null;
-      if (AUTO_PLAY && total > 1) {
-        autoTimer = setInterval(next, AUTO_PLAY_INTERVAL);
-        container.addEventListener('mouseenter', () => clearInterval(autoTimer));
-        container.addEventListener('mouseleave', () => {
-          autoTimer = setInterval(next, AUTO_PLAY_INTERVAL);
+      /* 2) Galleria */
+      function loadImages() {
+        if (allUrls.length) {
+          const nextIndex = loadedCount;
+          appendImages(nextIndex, nextIndex + INITIAL_BATCH);
+          if (btnLoadMore) {
+            btnLoadMore.hidden = loadedCount >= allUrls.length;
+          }
+          galleryWrap.hidden = false;
+          return;
+        }
+
+        fetch(API_FOTOS, { cache: "no-store" })
+          .then(res => res.json())
+          .then(data => {
+            if (!Array.isArray(data)) return;
+
+            allUrls = data
+              .filter(r =>
+                r.Stanza &&
+                r.Picture &&
+                r.Picture.url &&
+                r.Stanza.toLowerCase() === stanzaLabel.toLowerCase()
+              )
+              .map(r => r.Picture.url);
+
+            if (!allUrls.length) {
+              console.warn("Nessuna immagine per stanza:", stanzaLabel);
+              return;
+            }
+
+            appendImages(0, INITIAL_BATCH);
+            if (btnLoadMore) {
+              btnLoadMore.hidden = loadedCount >= allUrls.length;
+            }
+            galleryWrap.hidden = false;
+          })
+          .catch(err => {
+            console.error("Errore caricando immagini:", err);
+          });
+      }
+
+      if (btnSeeMore) {
+        btnSeeMore.addEventListener("click", () => {
+          descShortEl.hidden = true;
+          descFullEl.hidden  = false;
+
+          loadImages();
+
+          window.scrollTo({ top: 0, behavior: "smooth" });
         });
       }
 
-      updateSlider();
-    }
+      if (btnLoadMore) {
+        btnLoadMore.addEventListener("click", () => {
+          loadImages();
+        });
+      }
 
-    fetch(`${XANO_ENDPOINT}?stanza=${encodeURIComponent(stanza)}`)
-      .then(res => {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(data => {
-        const images = Array.isArray(data) ? data : data.images;
-        createSlider(images);
-      })
-      .catch(err => {
-        console.error('Errore galleria Xano:', err);
-        container.innerHTML =
-          '<div class="rg-message">Errore nel caricamento della galleria.</div>';
-      });
-  })();
-</script>
+      if (btnClose) {
+        btnClose.addEventListener("click", () => {
+          descShortEl.hidden = false;
+          descFullEl.hidden  = true;
+
+          galleryWrap.hidden = true;
+          galleryCol.innerHTML = "";
+          allUrls = [];
+          loadedCount = 0;
+          if (btnLoadMore) btnLoadMore.hidden = true;
+
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
+
+     
